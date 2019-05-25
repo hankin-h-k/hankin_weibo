@@ -17,6 +17,11 @@
 //首页
 Route::get('/', 'StaticPagesController@home')->name('home');
 //帮助
-Route::get('/', 'StaticPagesController@help')->name('help');
+Route::get('/help', 'StaticPagesController@help')->name('help');
 //关于
-Route::get('/', 'StaticPagesController@about')->name('about');
+Route::get('/about', 'StaticPagesController@about')->name('about');
+
+Route::get('login', 'SessionController@login')->name('login');
+Route::get('signup', 'UsersController@create')->name("signup");
+Route::resource('users', 'UsersController');
+Route::get('test', 'UsersController@sendEmailConfirmationTo');

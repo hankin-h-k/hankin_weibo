@@ -20,7 +20,8 @@ class UsersController extends Controller
 
    	public function show(User $user)
    	{
-
+         // $statuses = $user->statuses()->orderBy('created_at', 'desc')->paginate(10);
+         return view('users.show');
    	}
 
    	public function store(Request $request)
@@ -70,8 +71,11 @@ class UsersController extends Controller
 
    	}
 
-   	public function destory(User $user)
-   	{
-
-   	}
+    public function destroy(User $user)
+    {
+        $this->authorize('destroy', $user);
+        $user->delete();
+        session()->flash('success', '成功删除用户！');
+        return back();
+    }
 }

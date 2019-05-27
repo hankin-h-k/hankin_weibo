@@ -62,13 +62,31 @@ class UsersController extends Controller
    	}
 
    	public function edit(User $user)
-   	{
-
+   	{ 
+      $reuslt = $user->can('update', $user);
+      return view('users.edit', compact('user'));
    	}
 
    	public function update(User $user, Request $request)
    	{
-
+      //验证账号是否一致
+      $user->can('update', $user);
+      //验证参数
+      $this->validate($request, [
+        'name' => 'required|max:50',
+        'password' => 'nullable|confirm|min:6',
+      ]);
+      //修改参数
+      $data = [];
+      $data['name'] = $request->name;
+      if ($request->password) {
+        $data['password'] = bcrypt($request->password);
+      }
+      $user->update($data);
+      //提示
+      session()->flash('success', '個人資料修改成功');
+      //返回
+      return redirect()->route('users.show', $user);
    	}
 
     public function destroy(User $user)

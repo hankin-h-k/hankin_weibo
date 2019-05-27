@@ -27,6 +27,7 @@ Route::post('login', 'SessionsController@store')->name('login');
 Route::delete('logout', 'SessionsController@destroy')->name('logout');
 
 Route::get('signup/confirm/{token}', 'UsersController@confirmEmail')->name('confirm_email');
+<<<<<<< HEAD
 
 Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
 Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
@@ -40,3 +41,13 @@ Route::get('/users/{user}/followers', 'UsersController@followers')->name('users.
 
 Route::post('/users/followers/{user}', 'FollowersController@store')->name('followers.store');
 Route::delete('/users/followers/{user}', 'FollowersController@destroy')->name('followers.destroy');
+=======
+
+
+Route::get('signup', 'UsersController@create')->name("signup");
+Route::resource('users', 'UsersController');
+Route::get('test', 'UsersController@sendEmailConfirmationTo');
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+>>>>>>> 9799845dc2780297f91dc7b79b5e795041bb7aac

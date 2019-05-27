@@ -5,8 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Mail;
+use Illuminate\Support\Facades\Auth;
+
 class UsersController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth', [
+            'except' => ['show', 'create', 'store', 'index', 'confirmEmail']
+        ]);
+    }
     //注册页面
    	public function create()
    	{	
@@ -15,13 +24,23 @@ class UsersController extends Controller
 
    	public function index(Request $request)
    	{
-
+      $users = User::all();
+      return view('users.index', compact('users'));
    	}
 
    	public function show(User $user)
    	{
+<<<<<<< HEAD
          $statuses = $user->statuses()->orderBy('created_at', 'desc')->paginate(10);
          return view('users.show', compact('user', 'statuses'));
+=======
+        $reuslt = $user->can('view', $user);
+        if (!$reuslt) {
+          session()->flash("danger", '還沒登陸！');
+        }
+         // $statuses = $user->statuses()->orderBy('created_at', 'desc')->paginate(10);
+         return view('users.show');
+>>>>>>> 9799845dc2780297f91dc7b79b5e795041bb7aac
    	}
 
    	public function store(Request $request)
@@ -48,27 +67,53 @@ class UsersController extends Controller
    	}
    	
    	//确认邮件通知
-   	public function sendEmailConfirmationTo($user)
-   	{
-   		$view = 'emails.confirm';
-   		$data = compact($user);
-   		$to = $user->email;
-   		$subject = '感谢注册 WeiBo 应用！请确认你的邮箱';
+    protected function sendEmailConfirmationTo($user)
+    {
+        $view = 'emails.confirm';
+        $data = compact('user');
+        $to = $user->email;
+        $subject = "感谢注册 Weibo 应用！请确认你的邮箱。";
 
-   		Mail::send($view, $data, function($message) use($to, $subject) {
-   			$message->to($to)->subject($subject);
-   		});
-   		return ;
-   	}
+        Mail::send($view, $data, function ($message) use ($to, $subject) {
+            $message->to($to)->subject($subject);
+        });
+    }
 
    	public function edit(User $user)
    	{
-
+      $current_user = auth()->user();
+      $reuslt = $current_user->can('update', $user);
+      if (!$reuslt) {
+        session()->flash("danger", '账号没有权限');
+      }
+      return view('users.edit', compact('user'));
    	}
 
    	public function update(User $user, Request $request)
    	{
-
+      //验证账号是否一致
+      $current_user = auth()->user();
+      $reuslt = $current_user->can('update', $user);
+      if (!$reuslt) {
+        session()->flash("danger", '账号没有权限');
+        return view('users.edit', compact('user'));
+      }
+      //验证参数
+      $this->validate($request, [
+        'name' => 'required|max:50',
+        'password' => 'nullable|confirm|min:6',
+      ]);
+      //修改参数
+      $data = [];
+      $data['name'] = $request->name;
+      if ($request->password) {
+        $data['password'] = bcrypt($request->password);
+      }
+      $user->update($data);
+      //提示
+      session()->flash('success', '個人資料修改成功');
+      //返回
+      return redirect()->route('users.show', $user);
    	}
 
     public function destroy(User $user)
@@ -77,5 +122,29 @@ class UsersController extends Controller
         $user->delete();
         session()->flash('success', '成功删除用户！');
         return back();
+    }
+
+    public function confirmEmail($token)
+    {
+      $user = User::where('activation_token', $token)->first();
+      $user->activated = 1;
+      $user->email_verified_at = date('Y-m-d H:i:s');
+      $user->save();
+      dd(Auth::attempt(['email' => $user->email, 'password' => $user->password, 'activated'=>1]));
+      if (\Auth::attempt($data, $user->remember_token)) {
+        // if (\Auth::user()->activated) {
+      //     session()->flash('success', '欢迎回来！');
+      //     dd(1);
+      //     return redirect()->route('users.show', $user);
+      //else{
+      //     //帐号未激活 登出
+      //     \Auth::logout();
+      //     session()->flash('warning', '你的账号未激活，请检查邮箱中的注册邮件进行激活。');
+      //     return redirect('/');
+      //   }
+      // }else{
+      //   session()->flash('danger', '很抱歉，您的邮箱和密码不匹配');
+      //   return redirect()->back()->withInput();
+      }
     }
 }

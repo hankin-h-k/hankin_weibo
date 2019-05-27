@@ -60,18 +60,17 @@ class UsersController extends Controller
    	}
    	
    	//确认邮件通知
-   	public function sendEmailConfirmationTo($user)
-   	{
-   		$view = 'emails.confirm';
-   		$data = compact($user);
-   		$to = $user->email;
-   		$subject = '感谢注册 WeiBo 应用！请确认你的邮箱';
+    protected function sendEmailConfirmationTo($user)
+    {
+        $view = 'emails.confirm';
+        $data = compact('user');
+        $to = $user->email;
+        $subject = "感谢注册 Weibo 应用！请确认你的邮箱。";
 
-   		Mail::send($view, $data, function($message) use($to, $subject) {
-   			$message->to($to)->subject($subject);
-   		});
-   		return ;
-   	}
+        Mail::send($view, $data, function ($message) use ($to, $subject) {
+            $message->to($to)->subject($subject);
+        });
+    }
 
    	public function edit(User $user)
    	{
@@ -116,5 +115,14 @@ class UsersController extends Controller
         $user->delete();
         session()->flash('success', '成功删除用户！');
         return back();
+    }
+
+    public function confirmEmail($token)
+    {
+      $user = User::where('activation_token', $token)->first();
+      $user->activated = 1;
+      $user->save();
+      session()->flash('success', '账号已经激活，请登录使用');
+      return redirect()->route('login');
     }
 }

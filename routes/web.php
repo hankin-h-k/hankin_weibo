@@ -31,3 +31,6 @@ Route::get('signup/confirm/{token}', 'UsersController@confirmEmail')->name('conf
 Route::get('signup', 'UsersController@create')->name("signup");
 Route::resource('users', 'UsersController');
 Route::get('test', 'UsersController@sendEmailConfirmationTo');
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

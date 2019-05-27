@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Mail;
+use Illuminate\Support\Facades\Auth;
+
 class UsersController extends Controller
 {
 
@@ -121,8 +123,23 @@ class UsersController extends Controller
     {
       $user = User::where('activation_token', $token)->first();
       $user->activated = 1;
+      $user->email_verified_at = date('Y-m-d H:i:s');
       $user->save();
-      session()->flash('success', '账号已经激活，请登录使用');
-      return redirect()->route('login');
+      dd(Auth::attempt(['email' => $user->email, 'password' => $user->password, 'activated'=>1]));
+      if (\Auth::attempt($data, $user->remember_token)) {
+        // if (\Auth::user()->activated) {
+      //     session()->flash('success', '欢迎回来！');
+      //     dd(1);
+      //     return redirect()->route('users.show', $user);
+      //else{
+      //     //帐号未激活 登出
+      //     \Auth::logout();
+      //     session()->flash('warning', '你的账号未激活，请检查邮箱中的注册邮件进行激活。');
+      //     return redirect('/');
+      //   }
+      // }else{
+      //   session()->flash('danger', '很抱歉，您的邮箱和密码不匹配');
+      //   return redirect()->back()->withInput();
+      }
     }
 }

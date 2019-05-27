@@ -7,6 +7,13 @@ use App\Models\User;
 use Mail;
 class UsersController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth', [
+            'except' => ['show', 'create', 'store', 'index', 'confirmEmail']
+        ]);
+    }
     //注册页面
    	public function create()
    	{	
@@ -20,6 +27,10 @@ class UsersController extends Controller
 
    	public function show(User $user)
    	{
+        $reuslt = $user->can('view', $user);
+        if (!$reuslt) {
+          session()->flash("danger", '還沒登陸！');
+        }
          // $statuses = $user->statuses()->orderBy('created_at', 'desc')->paginate(10);
          return view('users.show');
    	}
@@ -62,15 +73,24 @@ class UsersController extends Controller
    	}
 
    	public function edit(User $user)
-   	{ 
-      $reuslt = $user->can('update', $user);
+   	{
+      $current_user = auth()->user();
+      $reuslt = $current_user->can('update', $user);
+      if (!$reuslt) {
+        session()->flash("danger", '账号没有权限');
+      }
       return view('users.edit', compact('user'));
    	}
 
    	public function update(User $user, Request $request)
    	{
       //验证账号是否一致
-      $user->can('update', $user);
+      $current_user = auth()->user();
+      $reuslt = $current_user->can('update', $user);
+      if (!$reuslt) {
+        session()->flash("danger", '账号没有权限');
+        return view('users.edit', compact('user'));
+      }
       //验证参数
       $this->validate($request, [
         'name' => 'required|max:50',

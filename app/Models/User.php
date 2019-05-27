@@ -51,7 +51,6 @@ class User extends Authenticatable
         return $this->hasMany(Status::class);
     }
 
-<<<<<<< HEAD
     public function followers()
     {
         return $this->belongsToMany(User::Class, 'followers', 'user_id', 'follower_id');
@@ -62,19 +61,15 @@ class User extends Authenticatable
         return $this->belongsToMany(User::Class, 'followers', 'follower_id', 'user_id');
     }
 
-=======
->>>>>>> 9799845dc2780297f91dc7b79b5e795041bb7aac
     public function gravatar($size = '100')
     {
         $hash = md5(strtolower(trim($this->attributes['email'])));
         return "http://www.gravatar.com/avatar/$hash?s=$size";
     }
-<<<<<<< HEAD
 
     public function isFollowing($user_id)
     {
         return $this->followings->contains($user_id);
     }
-=======
->>>>>>> 9799845dc2780297f91dc7b79b5e795041bb7aac
+
 }

@@ -30,17 +30,9 @@ class UsersController extends Controller
 
    	public function show(User $user)
    	{
-<<<<<<< HEAD
          $statuses = $user->statuses()->orderBy('created_at', 'desc')->paginate(10);
          return view('users.show', compact('user', 'statuses'));
-=======
-        $reuslt = $user->can('view', $user);
-        if (!$reuslt) {
-          session()->flash("danger", '還沒登陸！');
-        }
-         // $statuses = $user->statuses()->orderBy('created_at', 'desc')->paginate(10);
-         return view('users.show');
->>>>>>> 9799845dc2780297f91dc7b79b5e795041bb7aac
+
    	}
 
    	public function store(Request $request)
@@ -130,21 +122,8 @@ class UsersController extends Controller
       $user->activated = 1;
       $user->email_verified_at = date('Y-m-d H:i:s');
       $user->save();
-      dd(Auth::attempt(['email' => $user->email, 'password' => $user->password, 'activated'=>1]));
-      if (\Auth::attempt($data, $user->remember_token)) {
-        // if (\Auth::user()->activated) {
-      //     session()->flash('success', '欢迎回来！');
-      //     dd(1);
-      //     return redirect()->route('users.show', $user);
-      //else{
-      //     //帐号未激活 登出
-      //     \Auth::logout();
-      //     session()->flash('warning', '你的账号未激活，请检查邮箱中的注册邮件进行激活。');
-      //     return redirect('/');
-      //   }
-      // }else{
-      //   session()->flash('danger', '很抱歉，您的邮箱和密码不匹配');
-      //   return redirect()->back()->withInput();
-      }
+      Auth::login($user);
+      session()->flash('success', '欢迎回来！');
+      return redirect()->route('users.show', $user);
     }
 }

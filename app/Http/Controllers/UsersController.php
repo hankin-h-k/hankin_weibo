@@ -24,8 +24,8 @@ class UsersController extends Controller
 
    	public function index(Request $request)
    	{
-      $users = User::all();
-      return view('users.index', compact('users'));
+         $users = User::all();
+         return view('users.index', compact('users'));
    	}
 
    	public function show(User $user)
@@ -113,7 +113,7 @@ class UsersController extends Controller
         $this->authorize('destroy', $user);
         $user->delete();
         session()->flash('success', '成功删除用户！');
-        return back();
+        return redirect()->back();
     }
 
     public function confirmEmail($token)
